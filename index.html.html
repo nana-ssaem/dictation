@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>받아쓰기 만점왕 ✏️</title>
+<style>
+/* ══════════════════════════════════════
+   토큰 & 리셋
+══════════════════════════════════════ */
+:root {
+  --sky:#4FC3F7; --sky-d:#0288D1;
+  --sun:#FFD54F; --sun-d:#F9A825;
+  --green:#66BB6A; --green-d:#388E3C;
+  --coral:#FF7043; --coral-d:#E64A19;
+  --purple:#9575CD; --purple-d:#5E35B1;
+  --teal:#26C6DA; --teal-d:#00838F;
+  --bg:#FFF8E1; --card:#fff;
+  --text:#1A1A2E; --muted:#888;
+  --radius:22px; --shadow:0 6px 24px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none; -webkit-user-select:none;
+}
+
+/* ══════════════════════════════════════
+   화면 전환
+══════════════════════════════════════ */
+.screen{display:none;padding:18px;max-width:540px;margin:0 auto;}
+.screen.active{display:block;}
+
+/* ══════════════════════════════════════
+   헤더
+══════════════════════════════════════ */
+#app-header{
+  background:linear-gradient(135deg,var(--sky),var(--purple));
+  padding:14px 18px 12px; text-align:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.18); position:sticky; top:0; z-index:50;
+}
+#app-header h1{font-size:24px;font-weight:900;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.2);}
+#app-header p{font-size:13px;color:rgba(255,255,255,.88);margin-top:2px;}
+#teacher-entry{
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  background:rgba(255,255,255,.22); border:none; border-radius:10px;
+  color:#fff; font-size:22px; width:42px; height:42px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+
+/* ══════════════════════════════════════
+   공통 버튼
+══════════════════════════════════════ */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:0 22px; height:68px; font-size:21px; font-weight:800;
+  border:none; border-radius:18px; cursor:pointer; touch-action:manipulation;
+  transition:transform .1s, box-shadow .1s; letter-spacing:-.3px;
+}
+.btn:active{transform:translateY(3px);}
+.btn-full{width:100%;}
+.btn-lg{height:86px; font-size:25px;}
+.btn-sky   {background:var(--sky);    color:#fff; box-shadow:0 5px 0 var(--sky-d);}
+.btn-green {background:var(--green);  color:#fff; box-shadow:0 5px 0 var(--green-d);}
+.btn-coral {background:var(--coral);  color:#fff; box-shadow:0 5px 0 var(--coral-d);}
+.btn-purple{background:var(--purple); color:#fff; box-shadow:0 5px 0 var(--purple-d);}
+.btn-gray  {background:#90A4AE;       color:#fff; box-shadow:0 5px 0 #546E7A;}
+.btn-sun   {background:var(--sun);    color:#5D4037; box-shadow:0 5px 0 var(--sun-d);}
+.btn-teal  {background:var(--teal);   color:#fff; box-shadow:0 5px 0 var(--teal-d);}
+.btn:active{box-shadow:0 2px 0 rgba(0,0,0,.2)!important;}
+
+/* ══════════════════════════════════════
+   ① 홈 화면
+══════════════════════════════════════ */
+.welcome{text-align:center;padding:18px 0 10px;}
+.welcome .big-emoji{font-size:80px;display:block;animation:bounce 1.8s infinite;}
+.welcome h2{font-size:23px;font-weight:900;margin-top:8px;}
+.welcome p{font-size:16px;color:var(--muted);margin-top:4px;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:18px;}
+.topic-card{
+  background:var(--card); border-radius:var(--radius); padding:18px 10px;
+  text-align:center; cursor:pointer; box-shadow:var(--shadow);
+  border:3px solid transparent; transition:transform .15s, border-color .15s;
+  touch-action:manipulation;
+}
+.topic-card:active{transform:scale(.95);}
+.topic-card .tc-emoji{font-size:50px;display:block;}
+.topic-card .tc-name{font-size:17px;font-weight:800;margin-top:7px;}
+.topic-card .tc-cnt{font-size:13px;color:var(--muted);margin-top:2px;}
+.topic-card.col0{border-color:var(--sky);}
+.topic-card.col1{border-color:var(--green);}
+.topic-card.col2{border-color:var(--coral);}
+.topic-card.col3{border-color:var(--sun-d);}
+.topic-card.col4{border-color:var(--purple);}
+.topic-card.col5{border-color:var(--teal);}
+/* 교사 커스텀 세트 카드 */
+.topic-card.custom{border-color:#FF6F00; background:#FFF8E1;}
+
+/* ══════════════════════════════════════
+   ② 퀴즈 화면
+══════════════════════════════════════ */
+.quiz-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.back-btn{background:none;border:none;font-size:26px;cursor:pointer;padding:4px;flex-shrink:0;}
+.progress-wrap{flex:1;}
+.progress-bar{height:13px;background:#E0E0E0;border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--purple));border-radius:99px;transition:width .4s;}
+.progress-text{font-size:13px;color:var(--muted);text-align:right;margin-top:3px;}
+.score-badge{font-size:22px;font-weight:900;white-space:nowrap;flex-shrink:0;}
+
+.retry-banner{
+  background:linear-gradient(135deg,#FF7043,#FF5722); color:#fff;
+  border-radius:14px; padding:12px 16px; font-size:17px; font-weight:800;
+  text-align:center; margin-bottom:14px; display:none;
+}
+.retry-banner.show{display:block;}
+
+/* 단어 카드 */
+.word-card{
+  background:var(--card); border-radius:var(--radius);
+  padding:26px 16px 18px; box-shadow:var(--shadow); text-align:center; margin-bottom:16px;
+}
+.word-emoji{font-size:96px;line-height:1;display:block;}
+.word-hint{font-size:15px;color:var(--muted);margin-top:8px;}
+
+/* 듣기 버튼 */
+.listen-btn{
+  width:100%; height:76px; border:none; border-radius:18px; cursor:pointer;
+  background:linear-gradient(135deg,var(--sky),var(--sky-d)); color:#fff;
+  font-size:21px; font-weight:800; display:flex; align-items:center; justify-content:center;
+  gap:12px; box-shadow:0 5px 0 #0277BD; margin-bottom:16px; touch-action:manipulation;
+  transition:transform .1s;
+}
+.listen-btn:active{transform:translateY(3px); box-shadow:0 2px 0 #0277BD;}
+.speaker-icon{font-size:30px;}
+.speaker-icon.speaking{animation:speakPulse .5s infinite alternate;}
+@keyframes speakPulse{from{transform:scale(1)}to{transform:scale(1.3)}}
+
+/* ── 4지선다 보기 ── */
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px;}
+.choice-btn{
+  background:var(--card); border:3px solid #CFD8DC;
+  border-radius:18px; padding:0; height:86px;
+  font-size:26px; font-weight:900; cursor:pointer;
+  box-shadow:0 4px 0 #B0BEC5; display:flex; align-items:center; justify-content:center;
+  touch-action:manipulation; transition:transform .1s, border-color .15s, background .15s;
+  color:var(--text);
+}
+.choice-btn:active{transform:scale(.95);}
+.choice-btn:hover{border-color:var(--sky); background:#E1F5FE;}
+/* 정답 선택 후 색상 */
+.choice-btn.correct{
+  background:#E8F5E9; border-color:var(--green); color:var(--green-d);
+  box-shadow:0 4px 0 var(--green-d); animation:correctPop .35s ease;
+}
+.choice-btn.wrong{
+  background:#FBE9E7; border-color:var(--coral); color:var(--coral-d);
+  box-shadow:0 4px 0 var(--coral-d); animation:shake .4s ease;
+}
+.choice-btn.reveal{
+  background:#E8F5E9; border-color:var(--green); color:var(--green-d);
+}
+@keyframes correctPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+/* ══════════════════════════════════════
+   피드백 오버레이
+══════════════════════════════════════ */
+#fb-overlay{
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.52); z-index:200;
+  align-items:flex-end; justify-content:center; padding:0 14px 30px;
+}
+#fb-overlay.show{display:flex;}
+.fb-card{
+  background:#fff; border-radius:28px 28px 24px 24px;
+  padding:28px 22px 22px; width:100%; max-width:460px;
+  text-align:center; box-shadow:0 -6px 40px rgba(0,0,0,.22);
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.fb-emoji{font-size:72px;display:block;}
+.fb-title{font-size:28px;font-weight:900;margin:10px 0 6px;}
+.fb-word{
+  font-size:30px; font-weight:900; padding:12px 18px;
+  border-radius:14px; margin:8px 0 18px;
+}
+.fb-word.ok{background:#E8F5E9;color:#1B5E20;}
+.fb-word.ng{background:#FFF3E0;color:#BF360C;}
+.fb-next{
+  width:100%; height:70px; font-size:22px; font-weight:900;
+  border:none; border-radius:18px; cursor:pointer; touch-action:manipulation;
+  color:#fff; box-shadow:0 5px 0 rgba(0,0,0,.18);
+}
+
+/* ══════════════════════════════════════
+   ③ 결과 화면
+══════════════════════════════════════ */
+#screen-result{text-align:center;}
+.result-hero{font-size:96px;display:block;margin:16px 0 8px;}
+.result-card{
+  background:var(--card); border-radius:var(--radius);
+  padding:26px 18px; box-shadow:var(--shadow); margin-bottom:18px;
+}
+.result-pct{
+  font-size:76px; font-weight:900; line-height:1;
+  background:linear-gradient(135deg,var(--sky),var(--purple));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.result-lbl{font-size:19px;color:var(--muted);margin-top:4px;}
+.result-stars{font-size:38px;margin:10px 0;letter-spacing:4px;}
+.result-msg{font-size:21px;font-weight:800;margin-top:6px;}
+
+.wrong-section{
+  background:#FFF3E0; border-radius:var(--radius); padding:16px;
+  margin-bottom:18px; text-align:left; display:none;
+}
+.wrong-section h3{font-size:17px;font-weight:900;color:var(--coral-d);margin-bottom:10px;}
+.wrong-item{
+  display:flex; align-items:center; gap:12px; padding:10px 12px;
+  background:#fff; border-radius:12px; margin-bottom:8px;
+  font-size:20px; font-weight:700;
+}
+.wi-em{font-size:28px;}
+.result-btns{display:flex;flex-direction:column;gap:11px;}
+
+/* ══════════════════════════════════════
+   ④ 교사 설정 화면
+══════════════════════════════════════ */
+#screen-teacher{padding-bottom:40px;}
+.teacher-header{
+  display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.teacher-header h2{font-size:22px;font-weight:900;}
+
+/* 탭 */
+.tab-row{display:flex;gap:8px;margin-bottom:18px;}
+.tab-btn{
+  flex:1; height:50px; font-size:16px; font-weight:800;
+  border:2px solid #CFD8DC; border-radius:12px; background:#fff;
+  cursor:pointer; color:var(--muted); touch-action:manipulation;
+}
+.tab-btn.active{background:var(--purple);border-color:var(--purple);color:#fff;}
+
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* 문제 세트 관리 */
+.set-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.set-item{
+  background:var(--card); border-radius:14px; padding:14px 16px;
+  box-shadow:0 3px 10px rgba(0,0,0,.09);
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.set-info{flex:1;}
+.set-name{font-size:17px;font-weight:800;}
+.set-words{font-size:13px;color:var(--muted);margin-top:2px;}
+.set-actions{display:flex;gap:7px;}
+.icon-btn{
+  width:40px; height:40px; border-radius:10px; border:none;
+  font-size:18px; cursor:pointer; touch-action:manipulation;
+  display:flex; align-items:center; justify-content:center;
+}
+.btn-edit{background:#E3F2FD;color:#1565C0;}
+.btn-del {background:#FFEBEE;color:#B71C1C;}
+
+/* 새 세트 만들기 폼 */
+.form-section{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+.form-section h3{font-size:17px;font-weight:900;margin-bottom:14px;}
+.form-row{margin-bottom:14px;}
+.form-row label{display:block;font-size:15px;font-weight:700;margin-bottom:6px;color:#444;}
+.form-row input,.form-row textarea{
+  width:100%; padding:12px 14px; font-size:17px;
+  border:2px solid #CFD8DC; border-radius:12px; outline:none;
+  font-family:inherit; background:#FAFAFA; color:var(--text);
+}
+.form-row input:focus,.form-row textarea:focus{border-color:var(--purple);background:#fff;}
+.form-row textarea{height:130px;resize:vertical;line-height:1.7;}
+.form-hint{font-size:13px;color:var(--muted);margin-top:4px;}
+
+/* 단어 미리보기 태그 */
+.word-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.word-tag{
+  background:#EDE7F6; color:var(--purple-d); border-radius:99px;
+  padding:5px 13px; font-size:15px; font-weight:700;
+  display:flex; align-items:center; gap:5px;
+}
+.tag-del{background:none;border:none;font-size:13px;cursor:pointer;color:#9575CD;padding:0 2px;}
+
+/* 비슷한 글자(오답) 편집 */
+.similar-table{width:100%;border-collapse:collapse;margin-top:10px;}
+.similar-table th,.similar-table td{
+  padding:8px 10px; border:1px solid #E0E0E0; font-size:15px; text-align:left;
+}
+.similar-table th{background:#F3E5F5;font-weight:800;color:var(--purple-d);}
+.similar-input{
+  width:100%; border:1px solid #CFD8DC; border-radius:8px;
+  padding:6px 8px; font-size:15px; font-family:inherit; outline:none;
+}
+.similar-input:focus{border-color:var(--purple);}
+
+/* 오답 자동생성 뱃지 */
+.auto-badge{
+  font-size:12px; background:#E8F5E9; color:var(--green-d);
+  border-radius:99px; padding:2px 9px; font-weight:700;
+}
+
+/* 잠금 화면 */
+#lock-overlay{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+  z-index:300; align-items:center; justify-content:center; padding:20px;
+}
+#lock-overlay.show{display:flex;}
+.lock-card{
+  background:#fff; border-radius:24px; padding:32px 24px;
+  width:100%; max-width:340px; text-align:center; box-shadow:var(--shadow);
+}
+.lock-card h3{font-size:22px;font-weight:900;margin-bottom:6px;}
+.lock-card p{font-size:15px;color:var(--muted);margin-bottom:18px;}
+.pin-row{display:flex;justify-content:center;gap:10px;margin-bottom:18px;}
+.pin-dot{
+  width:18px; height:18px; border-radius:50%;
+  border:2px solid #CFD8DC; background:#fff; transition:background .15s;
+}
+.pin-dot.filled{background:var(--purple);border-color:var(--purple);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.num-btn{
+  height:64px; font-size:24px; font-weight:800;
+  border:2px solid #E0E0E0; border-radius:14px; background:#FAFAFA;
+  cursor:pointer; touch-action:manipulation; transition:background .1s;
+}
+.num-btn:active{background:#EDE7F6;}
+.lock-msg{font-size:15px;color:var(--coral);margin-top:10px;min-height:20px;}
+
+/* 불꽃 */
+#confetti-c{position:fixed;inset:0;pointer-events:none;z-index:400;}
+
+/* 반응형 */
+@media(min-width:480px){
+  .choices-grid{gap:14px;}
+  .choice-btn{height:94px;font-size:29px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ████ 헤더 ████ -->
+<div id="app-header">
+  <h1>✏️ 받아쓰기 만점왕</h1>
+  <p>들으면서 골라봐요! 🌟</p>
+  <button id="teacher-entry" title="교사 설정" aria-label="교사 설정">⚙️</button>
+</div>
+
+<!-- ████ 화면 1: 홈 ████ -->
+<div id="screen-home" class="screen active">
+  <div class="welcome">
+    <span class="big-emoji">🦊</span>
+    <h2>어떤 단어를 연습할까?</h2>
+    <p>주제를 골라봐요!</p>
+  </div>
+  <div class="topic-grid" id="topicGrid"></div>
+</div>
+
+<!-- ████ 화면 2: 퀴즈 ████ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-top">
+    <button class="back-btn" id="backBtn" aria-label="돌아가기">◀</button>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+      <div class="progress-text" id="progText">1 / 5</div>
+    </div>
+    <div class="score-badge" id="scoreBadge">⭐ 0</div>
+  </div>
+
+  <div class="retry-banner" id="retryBanner">🔁 틀린 단어를 다시 연습해요!</div>
+
+  <div class="word-card" id="wordCard">
+    <span class="word-emoji" id="wordEmoji">🍎</span>
+    <p class="word-hint" id="wordHint">💡 힌트</p>
+  </div>
+
+  <button class="listen-btn" id="listenBtn" aria-label="단어 듣기">
+    <span class="speaker-icon" id="speakerIcon">🔊</span>
+    <span id="listenText">다시 들을게요!</span>
+  </button>
+
+  <div class="choices-grid" id="choicesGrid"></div>
+</div>
+
+<!-- ████ 화면 3: 결과 ████ -->
+<div id="screen-result" class="screen">
+  <span class="result-hero" id="resultHero">🎉</span>
+  <div class="result-card">
+    <div class="result-pct" id="resultPct">80점</div>
+    <div class="result-lbl" id="resultLbl">잘했어요!</div>
+    <div class="result-stars" id="resultStars">⭐⭐⭐⭐</div>
+    <div class="result-msg" id="resultMsg">거의 다 맞았어요! 🎊</div>
+  </div>
+  <div class="wrong-section" id="wrongSection">
+    <h3>🔁 틀린 단어 다시 봐요</h3>
+    <div id="wrongItems"></div>
+  </div>
+  <div class="result-btns">
+    <button class="btn btn-coral btn-full btn-lg" id="retryWrongBtn" style="display:none">🔁 틀린 단어만 다시!</button>
+    <button class="btn btn-green btn-full btn-lg" id="retryAllBtn">🔄 처음부터 다시!</button>
+    <button class="btn btn-gray  btn-full" style="height:58px;font-size:18px" id="homeBtn">🏠 주제 바꾸기</button>
+  </div>
+</div>
+
+<!-- ████ 화면 4: 교사 설정 ████ -->
+<div id="screen-teacher" class="screen">
+  <div class="teacher-header">
+    <button class="back-btn" id="teacherBackBtn">◀</button>
+    <h2>⚙️ 교사 설정</h2>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" data-tab="tab-sets">📋 문제 세트</button>
+    <button class="tab-btn" data-tab="tab-new">➕ 새로 만들기</button>
+  </div>
+
+  <!-- 탭: 문제 세트 목록 -->
+  <div id="tab-sets" class="tab-panel active">
+    <div class="set-list" id="setList"></div>
+    <p id="setEmptyMsg" style="text-align:center;color:var(--muted);font-size:16px;padding:20px 0;">아직 만든 문제 세트가 없어요.<br>➕ 새로 만들기로 추가해보세요!</p>
+  </div>
+
+  <!-- 탭: 새로 만들기 / 편집 -->
+  <div id="tab-new" class="tab-panel">
+    <div class="form-section">
+      <h3 id="formTitle">➕ 새 문제 세트 만들기</h3>
+
+      <div class="form-row">
+        <label>📝 세트 이름</label>
+        <input type="text" id="fSetName" placeholder="예: 우리 반 받아쓰기 1회" maxlength="20">
+      </div>
+
+      <div class="form-row">
+        <label>🎨 대표 이모지</label>
+        <input type="text" id="fEmoji" placeholder="예: 📝" maxlength="2" style="width:80px;text-align:center;font-size:26px;">
+      </div>
+
+      <div class="form-row">
+        <label>
+          단어 목록
+          <span class="auto-badge">오답 자동 생성</span>
+        </label>
+        <textarea id="fWords" placeholder="단어를 한 줄에 하나씩 입력하세요&#10;예)&#10;사과&#10;바나나&#10;고양이&#10;학교&#10;친구"></textarea>
+        <div class="form-hint">💡 단어당 비슷한 오답 3개가 자동으로 만들어져요. 직접 바꿀 수도 있어요.</div>
+        <div class="word-tags" id="wordTags"></div>
+      </div>
+
+      <!-- 힌트 입력 (선택) -->
+      <div class="form-row">
+        <label>💡 힌트 (선택, 단어 순서대로 한 줄씩)</label>
+        <textarea id="fHints" placeholder="예)&#10;빨간 과일이에요&#10;노란색이에요&#10;야옹 울어요" style="height:90px;"></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>🖼️ 그림 이모지 (선택, 단어 순서대로 한 줄씩)</label>
+        <textarea id="fEmojis" placeholder="예)&#10;🍎&#10;🍌&#10;🐱" style="height:90px;"></textarea>
+      </div>
+
+      <!-- 오답 미리보기/편집 -->
+      <div class="form-row" id="distractorSection" style="display:none">
+        <label>🔀 오답 보기 편집 (각 단어당 오답 3개)</label>
+        <div style="overflow-x:auto;">
+          <table class="similar-table" id="distractorTable">
+            <thead><tr><th>단어</th><th>오답1</th><th>오답2</th><th>오답3</th></tr></thead>
+            <tbody id="distractorBody"></tbody>
+          </table>
+        </div>
+        <div class="form-hint">💡 비슷한 글자를 직접 수정할 수 있어요.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-sky" style="flex:1;height:58px;font-size:17px" id="previewBtn">👁️ 미리보기</button>
+        <button class="btn btn-green" style="flex:1;height:58px;font-size:17px" id="saveSetBtn">💾 저장하기</button>
+      </div>
+      <button class="btn btn-gray btn-full" style="height:52px;font-size:16px;margin-top:10px" id="cancelEditBtn" style="display:none">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ████ 피드백 오버레이 ████ -->
+<div id="fb-overlay" role="dialog" aria-modal="true">
+  <div class="fb-card">
+    <span class="fb-emoji" id="fbEmoji">⭐</span>
+    <div class="fb-title" id="fbTitle">맞았어요!</div>
+    <div class="fb-word" id="fbWord"></div>
+    <button class="fb-next" id="fbNext">다음 문제 ▶</button>
+  </div>
+</div>
+
+<!-- ████ 잠금 오버레이 ████ -->
+<div id="lock-overlay" role="dialog" aria-modal="true">
+  <div class="lock-card">
+    <div style="font-size:42px;margin-bottom:8px;">🔐</div>
+    <h3>교사 전용 공간이에요</h3>
+    <p>비밀번호 4자리를 눌러주세요</p>
+    <div class="pin-row" id="pinDots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="numpad" id="numpad"></div>
+    <div class="lock-msg" id="lockMsg"></div>
+  </div>
+</div>
+
+<canvas id="confetti-c"></canvas>
+
+<script>
+/* ════════════════════════════════════════════════
+   데이터: 기본 내장 단어 세트 (2022 개정 1학년)
+════════════════════════════════════════════════ */
+const BUILTIN = [
+  { id:'b0', name:'동물 친구', emoji:'🐶',
+    words:[
+      {word:'개',   emoji:'🐶', hint:'멍멍 짖어요',   distractors:['게','기','고']},
+      {word:'고양이',emoji:'🐱', hint:'야옹 울어요',   distractors:['고냥이','고양히','고량이']},
+      {word:'토끼', emoji:'🐰', hint:'귀가 길어요',   distractors:['토기','토까','도끼']},
+      {word:'새',   emoji:'🐦', hint:'하늘을 날아요', distractors:['세','쌔','사이']},
+      {word:'소',   emoji:'🐮', hint:'음메 울어요',   distractors:['수','서','솟']},
+      {word:'닭',   emoji:'🐔', hint:'꼬끼오 울어요', distractors:['달','닼','다리']},
+    ]},
+  { id:'b1', name:'과일 나라', emoji:'🍎',
+    words:[
+      {word:'사과',  emoji:'🍎', hint:'빨간 과일이에요', distractors:['사가','서과','사꽈']},
+      {word:'바나나', emoji:'🍌', hint:'노란 과일이에요', distractors:['바나다','버나나','바바나']},
+      {word:'포도',  emoji:'🍇', hint:'보라색이에요',   distractors:['보도','포드','포돠']},
+      {word:'수박',  emoji:'🍉', hint:'여름에 먹어요',  distractors:['스박','수빡','수발']},
+      {word:'딸기',  emoji:'🍓', hint:'빨갛고 달콤해요',distractors:['딸기','달기','딸기']},
+      {word:'귤',   emoji:'🍊', hint:'겨울에 먹어요',  distractors:['굴','귤','글']},
+    ]},
+  { id:'b2', name:'우리 몸', emoji:'🙋',
+    words:[
+      {word:'눈',  emoji:'👀', hint:'볼 때 써요',    distractors:['는','뉸','뉴']},
+      {word:'코',  emoji:'👃', hint:'냄새를 맡아요', distractors:['쿠','코스','커']},
+      {word:'입',  emoji:'👄', hint:'말하고 먹어요', distractors:['잎','읻','잇']},
+      {word:'귀',  emoji:'👂', hint:'들을 때 써요',  distractors:['기','거','긔']},
+      {word:'손',  emoji:'🖐️', hint:'잡을 때 써요',  distractors:['순','산','쏜']},
+      {word:'발',  emoji:'🦶', hint:'걸을 때 써요',  distractors:['밭','빨','박']},
+    ]},
+  { id:'b3', name:'학교 생활', emoji:'🏫',
+    words:[
+      {word:'책',    emoji:'📚', hint:'읽는 것이에요',  distractors:['첵','챗','책상']},
+      {word:'연필',  emoji:'✏️', hint:'쓸 때 써요',    distractors:['연핀','연귈','열필']},
+      {word:'지우개', emoji:'🩹', hint:'틀리면 지워요', distractors:['지우게','지우기','직우개']},
+      {word:'가방',  emoji:'🎒', hint:'메고 다녀요',   distractors:['거방','가봉','가밥']},
+      {word:'친구',  emoji:'👧', hint:'같이 놀아요',   distractors:['친고','출구','쳔구']},
+      {word:'선생님', emoji:'👩‍🏫',hint:'가르쳐 줘요',  distractors:['선생임','선성님','선생늠']},
+    ]},
+  { id:'b4', name:'자연 세계', emoji:'🌈',
+    words:[
+      {word:'꽃',   emoji:'🌸', hint:'예쁜 향기가 나요', distractors:['꽂','꽈','곷']},
+      {word:'나무', emoji:'🌳', hint:'키가 커요',       distractors:['나모','나뭐','너무']},
+      {word:'하늘', emoji:'☀️', hint:'위에 있어요',     distractors:['하날','하늘','하를']},
+      {word:'바람', emoji:'💨', hint:'시원하게 불어요', distractors:['파람','바룸','발암']},
+      {word:'구름', emoji:'☁️', hint:'하늘에 떠 있어요',distractors:['구릅','구롬','굴름']},
+      {word:'풀',   emoji:'🌿', hint:'초록색이에요',    distractors:['풀','불','뿔']},
+    ]},
+  { id:'b5', name:'맛있는 음식', emoji:'🍚',
+    words:[
+      {word:'밥',   emoji:'🍚', hint:'먹어야 힘이 나요', distractors:['밥','밥','밮']},
+      {word:'빵',   emoji:'🍞', hint:'부드러워요',       distractors:['뻥','빵이','팡']},
+      {word:'국',   emoji:'🍲', hint:'뜨거운 음식이에요',distractors:['굿','긋','극']},
+      {word:'김치', emoji:'🥬', hint:'맵고 맛있어요',    distractors:['김처','긤치','김시']},
+      {word:'우유', emoji:'🥛', hint:'흰색 음료예요',    distractors:['우요','위유','오유']},
+      {word:'과자', emoji:'🍪', hint:'달콤해요',         distractors:['화자','과저','파자']},
+    ]},
+];
+
+// 오답 자동 생성 (한글 혼동 패턴)
+const CONFUSE = {
+  ㄱ:['ㅋ','ㄲ','ㅎ'], ㄴ:['ㅁ','ㄹ','ㄷ'], ㄷ:['ㅌ','ㄸ','ㄴ'],
+  ㄹ:['ㄴ','ㄷ','ㄱ'], ㅁ:['ㄴ','ㅂ','ㅍ'], ㅂ:['ㅍ','ㅃ','ㅁ'],
+  ㅅ:['ㅈ','ㅆ','ㅎ'], ㅇ:['ㅎ','ㅁ','ㄴ'], ㅈ:['ㅊ','ㅉ','ㅅ'],
+  ㅊ:['ㅈ','ㅋ','ㅎ'], ㅋ:['ㄱ','ㄲ','ㅎ'], ㅌ:['ㄷ','ㅍ','ㅋ'],
+  ㅍ:['ㅂ','ㅁ','ㅃ'], ㅎ:['ㅇ','ㅅ','ㅋ'],
+  ㅏ:['ㅓ','ㅑ','ㅐ'], ㅓ:['ㅏ','ㅕ','ㅗ'], ㅗ:['ㅜ','ㅓ','ㅛ'],
+  ㅜ:['ㅗ','ㅠ','ㅡ'], ㅡ:['ㅜ','ㅗ','ㅣ'], ㅣ:['ㅡ','ㅐ','ㅔ'],
+  ㅐ:['ㅔ','ㅣ','ㅏ'], ㅔ:['ㅐ','ㅣ','ㅓ'],
+};
+const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+function decomposeChar(c){
+  const code=c.charCodeAt(0)-0xAC00;
+  if(code<0||code>11171)return null;
+  return{cho:CHO[Math.floor(code/21/28)],jung:JUNG[Math.floor(code/28)%21],jong:JONG[code%28]};
+}
+function composeChar(cho,jung,jong){
+  const ci=CHO.indexOf(cho),vi=JUNG.indexOf(jung),ti=JONG.indexOf(jong);
+  if(ci<0||vi<0||ti<0)return null;
+  return String.fromCharCode(0xAC00+ci*21*28+vi*28+ti);
+}
+function mutateWord(word){
+  // 단어의 첫 글자 모음/자음 하나를 혼동 패턴으로 바꿈
+  const chars=[...word];
+  for(let i=0;i<chars.length;i++){
+    const d=decomposeChar(chars[i]);
+    if(!d)continue;
+    const targets=[d.cho,d.jung,d.jong].filter(x=>x&&CONFUSE[x]);
+    if(!targets.length)continue;
+    const pick=targets[Math.floor(Math.random()*targets.length)];
+    const alts=CONFUSE[pick].filter(a=>a!==pick);
+    if(!alts.length)continue;
+    const alt=alts[Math.floor(Math.random()*alts.length)];
+    let nc=d.cho,nv=d.jung,nt=d.jong;
+    if(pick===d.cho)nc=alt;
+    else if(pick===d.jung)nv=alt;
+    else nt=alt;
+    const composed=composeChar(nc,nv,nt);
+    if(composed){
+      const res=[...chars]; res[i]=composed;
+      const candidate=res.join('');
+      if(candidate!==word)return candidate;
+    }
+  }
+  // fallback: 마지막 글자 제거하거나 글자 순서 바꾸기
+  if(word.length>1)return word.slice(0,word.length-1)+word[word.length-1].replace(/./,'?');
+  return word+'?';
+}
+function autoDistractors(word){
+  const seen=new Set([word]);
+  const res=[];
+  let tries=0;
+  while(res.length<3&&tries<30){
+    tries++;
+    const m=mutateWord(word);
+    if(!seen.has(m)){seen.add(m);res.push(m);}
+  }
+  while(res.length<3)res.push(word+'?');
+  return res;
+}
+
+/* ════════════════════════════════════════════════
+   스토리지 헬퍼
+════════════════════════════════════════════════ */
+const STORE_KEY='dictation_custom_sets';
+function loadCustomSets(){
+  try{return JSON.parse(localStorage.getItem(STORE_KEY)||'[]');}catch{return [];}
+}
+function saveCustomSets(sets){
+  localStorage.setItem(STORE_KEY,JSON.stringify(sets));
+}
+
+/* ════════════════════════════════════════════════
+   앱 상태
+════════════════════════════════════════════════ */
+let S={
+  topicId:null, queue:[], cur:0, score:0, correct:0,
+  wrong:[], isRetry:false, total:0, answered:false,
+  editSetId:null,
+};
+
+/* ════════════════════════════════════════════════
+   화면 전환
+════════════════════════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ════════════════════════════════════════════════
+   TTS
+════════════════════════════════════════════════ */
+let ttsTimer=null;
+function speak(text,onEnd){
+  if(!window.speechSynthesis){onEnd&&onEnd();return;}
+  window.speechSynthesis.cancel();
+  clearTimeout(ttsTimer);
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ko-KR'; u.rate=0.88; u.pitch=1.1;
+  u.onstart=()=>{
+    const ic=document.getElementById('speakerIcon');
+    const lt=document.getElementById('listenText');
+    if(ic)ic.classList.add('speaking');
+    if(lt)lt.textContent='듣는 중... 🎵';
+  };
+  u.onend=()=>{
+    const ic=document.getElementById('speakerIcon');
+    const lt=document.getElementById('listenText');
+    if(ic)ic.classList.remove('speaking');
+    if(lt)lt.textContent='다시 들을게요!';
+    onEnd&&onEnd();
+  };
+  // iOS Safari 워크어라운드
+  ttsTimer=setTimeout(()=>window.speechSynthesis.speak(u),80);
+}
+
+/* ════════════════════════════════════════════════
+   홈 화면 빌드
+════════════════════════════════════════════════ */
+function buildHome(){
+  const grid=document.getElementById('topicGrid');
+  grid.innerHTML='';
+  const customs=loadCustomSets();
+  const all=[...BUILTIN.map(t=>({...t,isCustom:false})),
+             ...customs.map(t=>({...t,isCustom:true}))];
+  all.forEach((t,i)=>{
+    const card=document.createElement('div');
+    card.className=`topic-card col${i%6}${t.isCustom?' custom':''}`;
+    card.setAttribute('role','button'); card.setAttribute('tabindex','0');
+    card.setAttribute('aria-label',t.name+' 선택');
+    card.innerHTML=`<span class="tc-emoji">${t.emoji||'📝'}</span>
+      <div class="tc-name">${t.isCustom?'⭐ ':''} ${t.name}</div>
+      <div class="tc-cnt">${t.words.length}개 단어</div>`;
+    card.addEventListener('click',()=>startTopic(t));
+    card.addEventListener('keydown',e=>e.key==='Enter'&&startTopic(t));
+    grid.appendChild(card);
+  });
+}
+
+/* ════════════════════════════════════════════════
+   퀴즈 시작
+════════════════════════════════════════════════ */
+function startTopic(topic){
+  S.topicId=topic.id;
+  S.queue=shuffle([...topic.words]).slice(0,Math.min(6,topic.words.length));
+  S.cur=0; S.score=0; S.correct=0; S.wrong=[];
+  S.isRetry=false; S.total=S.queue.length; S.answered=false;
+  document.getElementById('retryBanner').classList.remove('show');
+  showScreen('screen-quiz');
+  speak(topic.name+'! 시작해봐요!',()=>loadQ());
+  updateScoreBadge();
+}
+function startRetry(wrongArr){
+  S.queue=shuffle([...wrongArr]);
+  S.cur=0; S.correct=0; S.isRetry=true;
+  S.total=S.queue.length; S.answered=false;
+  document.getElementById('retryBanner').classList.add('show');
+  showScreen('screen-quiz');
+  speak('틀린 단어를 다시 해봐요!',()=>loadQ());
+}
+
+/* ════════════════════════════════════════════════
+   문제 로드
+════════════════════════════════════════════════ */
+function loadQ(){
+  S.answered=false;
+  const item=S.queue[S.cur];
+  document.getElementById('wordEmoji').textContent=item.emoji||'📝';
+  document.getElementById('wordHint').textContent='💡 '+( item.hint||'잘 들어보세요!');
+  updateProgress();
+  buildChoices(item);
+  setTimeout(()=>speak(item.word),350);
+}
+
+function updateProgress(){
+  const pct=(S.cur/S.total)*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progText').textContent=(S.cur+1)+' / '+S.total;
+}
+function updateScoreBadge(){
+  document.getElementById('scoreBadge').textContent='⭐ '+S.score;
+}
+
+/* ════════════════════════════════════════════════
+   4지선다 빌드
+════════════════════════════════════════════════ */
+function buildChoices(item){
+  const grid=document.getElementById('choicesGrid');
+  grid.innerHTML='';
+  // 정답 + 오답 3개
+  const dist=(item.distractors&&item.distractors.length>=3)
+    ?item.distractors.slice(0,3)
+    :autoDistractors(item.word);
+  const options=shuffle([item.word,...dist]);
+
+  options.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=opt;
+    btn.setAttribute('aria-label','보기: '+opt);
+    btn.addEventListener('click',()=>selectChoice(btn,opt,item,grid));
+    grid.appendChild(btn);
+  });
+}
+
+function selectChoice(btn,chosen,item,grid){
+  if(S.answered)return;
+  S.answered=true;
+  const isOk=chosen===item.word;
+
+  // 버튼 색상
+  const allBtns=grid.querySelectorAll('.choice-btn');
+  allBtns.forEach(b=>{
+    if(b===btn) b.classList.add(isOk?'correct':'wrong');
+    if(b.textContent===item.word&&!isOk) b.classList.add('reveal');
+  });
+
+  if(isOk){
+    S.score+=10; S.correct++;
+    updateScoreBadge();
+    const msgs=['잘했어요!','맞아요!','대단해요!','완벽해요!','짱이에요!'];
+    speak(msgs[Math.floor(Math.random()*msgs.length)]);
+    setTimeout(()=>showFeedback(item,true),500);
+  }else{
+    if(!S.wrong.find(w=>w.word===item.word))S.wrong.push(item);
+    speak('다시 한 번 들어봐요!');
+    setTimeout(()=>showFeedback(item,false),700);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   피드백 오버레이
+════════════════════════════════════════════════ */
+function showFeedback(item,ok){
+  const emojis_ok=['🎉','⭐','🌟','🏆','👏','🥳'];
+  const ov=document.getElementById('fb-overlay');
+  document.getElementById('fbEmoji').textContent=ok?emojis_ok[Math.floor(Math.random()*emojis_ok.length)]:'💪';
+  document.getElementById('fbTitle').textContent=ok?'맞았어요!':'아쉬워요!';
+  document.getElementById('fbTitle').style.color=ok?'#2E7D32':'#E64A19';
+  const fw=document.getElementById('fbWord');
+  fw.className='fb-word '+(ok?'ok':'ng');
+  fw.innerHTML=ok
+    ?`${item.emoji||''} <strong>${item.word}</strong> 정답이에요! 🎊`
+    :`정답은 <strong>${item.word}</strong> ${item.emoji||''} 이에요!`;
+  const nb=document.getElementById('fbNext');
+  nb.style.background=ok?'var(--green)':'var(--coral)';
+  nb.style.boxShadow=ok?'0 5px 0 var(--green-d)':'0 5px 0 var(--coral-d)';
+  nb.textContent='다음 문제 ▶';
+  ov.classList.add('show');
+  if(ok)launchConfetti(40);
+}
+function hideFeedback(){
+  document.getElementById('fb-overlay').classList.remove('show');
+  S.cur++;
+  if(S.cur>=S.queue.length)showResult();
+  else loadQ();
+}
+
+/* ════════════════════════════════════════════════
+   결과 화면
+════════════════════════════════════════════════ */
+function showResult(){
+  const pct=Math.round((S.correct/S.total)*100);
+  let hero,lbl,msg,stars;
+  if(pct===100){hero='🏆';lbl='만점이에요!';msg='완벽해요! 정말 대단해요! 🎉';stars='⭐⭐⭐⭐⭐';launchConfetti(150);speak('만점이에요! 최고!');}
+  else if(pct>=80){hero='🌟';lbl='잘 했어요!';msg='거의 다 맞았어요! 최고! 🎊';stars='⭐⭐⭐⭐';speak('정말 잘 했어요!');}
+  else if(pct>=60){hero='😊';lbl='좋아요!';msg='조금 더 연습하면 만점이에요! 💪';stars='⭐⭐⭐';speak('좋아요! 조금만 더 연습해봐요!');}
+  else{hero='💪';lbl='도전해봐요!';msg='다시 연습하면 분명 잘 할 수 있어요! 🌈';stars='⭐⭐';speak('괜찮아요! 다시 한번 해봐요!');}
+
+  document.getElementById('resultHero').textContent=hero;
+  document.getElementById('resultPct').textContent=pct+'점';
+  document.getElementById('resultLbl').textContent=lbl;
+  document.getElementById('resultMsg').textContent=msg;
+  document.getElementById('resultStars').textContent=stars;
+
+  const ws=document.getElementById('wrongSection');
+  const wi=document.getElementById('wrongItems');
+  const rwb=document.getElementById('retryWrongBtn');
+  if(S.wrong.length>0){
+    wi.innerHTML=S.wrong.map(w=>`<div class="wrong-item"><span class="wi-em">${w.emoji||'📝'}</span><span>${w.word}</span></div>`).join('');
+    ws.style.display='block'; rwb.style.display='flex';
+  }else{ws.style.display='none'; rwb.style.display='none';}
+  showScreen('screen-result');
+}
+
+/* ════════════════════════════════════════════════
+   불꽃 파티클
+════════════════════════════════════════════════ */
+function launchConfetti(n=80){
+  const c=document.getElementById('confetti-c');
+  c.width=window.innerWidth; c.height=window.innerHeight;
+  const ctx=c.getContext('2d');
+  const pieces=Array.from({length:n},()=>({
+    x:Math.random()*c.width, y:Math.random()*c.height-c.height,
+    r:Math.random()*9+4,
+    color:['#FF7043','#FFD54F','#66BB6A','#4FC3F7','#9575CD','#FF80AB'][Math.floor(Math.random()*6)],
+    vx:(Math.random()-.5)*4, vy:Math.random()*4+2,
+    rot:Math.random()*360, rv:(Math.random()-.5)*6,
+  }));
+  let f=0;
+  (function anim(){
+    if(++f>180){ctx.clearRect(0,0,c.width,c.height);return;}
+    ctx.clearRect(0,0,c.width,c.height);
+    pieces.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rv;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.r/2,-p.r*.3,p.r,p.r*.6);
+      ctx.restore();
+    });
+    requestAnimationFrame(anim);
+  })();
+}
+
+/* ════════════════════════════════════════════════
+   잠금 화면 (PIN: 1234 기본, localStorage로 변경 가능)
+════════════════════════════════════════════════ */
+const PIN_KEY='dictation_pin';
+function getPin(){return localStorage.getItem(PIN_KEY)||'1234';}
+let pinInput='';
+
+function showLock(){
+  pinInput='';
+  updateDots();
+  document.getElementById('lockMsg').textContent='';
+  buildNumpad();
+  document.getElementById('lock-overlay').classList.add('show');
+}
+function hideLock(){document.getElementById('lock-overlay').classList.remove('show');}
+
+function updateDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('d'+i).classList.toggle('filled',i<pinInput.length);
+  }
+}
+function buildNumpad(){
+  const np=document.getElementById('numpad');
+  np.innerHTML='';
+  const keys=['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  keys.forEach(k=>{
+    const b=document.createElement('button');
+    b.className='num-btn'; b.textContent=k||'';
+    if(!k)b.style.visibility='hidden';
+    b.addEventListener('click',()=>{
+      if(k==='⌫'){pinInput=pinInput.slice(0,-1);}
+      else if(k&&pinInput.length<4){pinInput+=k;}
+      updateDots();
+      if(pinInput.length===4){
+        if(pinInput===getPin()){hideLock();showTeacherScreen();}
+        else{document.getElementById('lockMsg').textContent='❌ 비밀번호가 달라요! 다시 눌러보세요.';pinInput='';updateDots();}
+      }
+    });
+    np.appendChild(b);
+  });
+}
+
+/* ════════════════════════════════════════════════
+   교사 설정 화면
+════════════════════════════════════════════════ */
+function showTeacherScreen(){
+  showScreen('screen-teacher');
+  switchTab('tab-sets');
+  renderSetList();
+  resetForm();
+}
+
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===id));
+}
+
+/* ── 세트 목록 ── */
+function renderSetList(){
+  const sets=loadCustomSets();
+  const list=document.getElementById('setList');
+  const emptyMsg=document.getElementById('setEmptyMsg');
+  list.innerHTML='';
+  emptyMsg.style.display=sets.length?'none':'block';
+  sets.forEach(s=>{
+    const el=document.createElement('div');
+    el.className='set-item';
+    el.innerHTML=`
+      <div class="set-info">
+        <div class="set-name">${s.emoji||'📝'} ${s.name}</div>
+        <div class="set-words">${s.words.map(w=>w.word).join(', ')}</div>
+      </div>
+      <div class="set-actions">
+        <button class="icon-btn btn-edit" title="편집" data-id="${s.id}">✏️</button>
+        <button class="icon-btn btn-del"  title="삭제" data-id="${s.id}">🗑️</button>
+      </div>`;
+    el.querySelector('.btn-edit').addEventListener('click',()=>editSet(s.id));
+    el.querySelector('.btn-del').addEventListener('click',()=>deleteSet(s.id));
+    list.appendChild(el);
+  });
+}
+
+function deleteSet(id){
+  if(!confirm('이 문제 세트를 삭제할까요?'))return;
+  const sets=loadCustomSets().filter(s=>s.id!==id);
+  saveCustomSets(sets);
+  renderSetList();
+  buildHome();
+}
+
+function editSet(id){
+  const sets=loadCustomSets();
+  const s=sets.find(x=>x.id===id);
+  if(!s)return;
+  S.editSetId=id;
+  document.getElementById('fSetName').value=s.name;
+  document.getElementById('fEmoji').value=s.emoji||'📝';
+  document.getElementById('fWords').value=s.words.map(w=>w.word).join('\n');
+  document.getElementById('fHints').value=s.words.map(w=>w.hint||'').join('\n');
+  document.getElementById('fEmojis').value=s.words.map(w=>w.emoji||'').join('\n');
+  document.getElementById('formTitle').textContent='✏️ 문제 세트 편집';
+  renderWordTags(s.words.map(w=>w.word));
+  renderDistractorTable(s.words);
+  switchTab('tab-new');
+}
+
+/* ── 단어 태그 미리보기 ── */
+function renderWordTags(words){
+  const container=document.getElementById('wordTags');
+  container.innerHTML='';
+  words.forEach(w=>{
+    if(!w.trim())return;
+    const tag=document.createElement('span');
+    tag.className='word-tag';
+    tag.innerHTML=`${w}<button class="tag-del" aria-label="${w} 삭제">×</button>`;
+    tag.querySelector('.tag-del').addEventListener('click',()=>{
+      const lines=document.getElementById('fWords').value.split('\n').filter(l=>l.trim()!==w.trim());
+      document.getElementById('fWords').value=lines.join('\n');
+      updateWordTags();
+    });
+    container.appendChild(tag);
+  });
+}
+function updateWordTags(){
+  const words=document.getElementById('fWords').value.split('\n').map(w=>w.trim()).filter(Boolean);
+  renderWordTags(words);
+}
+
+/* ── 오답 테이블 ── */
+function renderDistractorTable(wordObjs){
+  const sec=document.getElementById('distractorSection');
+  const tbody=document.getElementById('distractorBody');
+  if(!wordObjs||!wordObjs.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  tbody.innerHTML='';
+  wordObjs.forEach((w,i)=>{
+    const dist=(w.distractors&&w.distractors.length>=3)?w.distractors:autoDistractors(w.word);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:800;font-size:17px">${w.word}</td>
+      ${dist.slice(0,3).map((d,j)=>`<td><input class="similar-input" value="${d}" data-wi="${i}" data-di="${j}" maxlength="8"></td>`).join('')}`;
+    tbody.appendChild(tr);
+  });
+}
+function collectDistractors(words){
+  const table=document.getElementById('distractorBody');
+  if(!table)return words.map(w=>({...w,distractors:autoDistractors(w.word)}));
+  const rows=table.querySelectorAll('tr');
+  return words.map((w,i)=>{
+    const inputs=rows[i]?rows[i].querySelectorAll('input'):[];
+    const dist=[...inputs].map(inp=>inp.value.trim()||autoDistractors(w.word)[0]);
+    return{...w,distractors:dist};
+  });
+}
+
+/* ── 미리보기 ── */
+document.getElementById('previewBtn').addEventListener('click',()=>{
+  const words=document.getElementById('fWords').value.split('\n').map(w=>w.trim()).filter(Boolean);
+  if(!words.length){alert('단어를 입력해주세요!');return;}
+  const hints=document.getElementById('fHints').value.split('\n').map(h=>h.trim());
+  const emojis=document.getElementById('fEmojis').value.split('\n').map(e=>e.trim());
+  const wordObjs=words.map((w,i)=>({word:w,hint:hints[i]||'잘 들어보세요!',emoji:emojis[i]||'📝',distractors:autoDistractors(w)}));
+  renderDistractorTable(wordObjs);
+  alert('오답 보기가 아래 표에 생성됐어요! 직접 수정할 수 있어요 ✅');
+});
+
+/* ── 저장 ── */
+document.getElementById('saveSetBtn').addEventListener('click',()=>{
+  const name=document.getElementById('fSetName').value.trim();
+  const emoji=document.getElementById('fEmoji').value.trim()||'📝';
+  const rawWords=document.getElementById('fWords').value.split('\n').map(w=>w.trim()).filter(Boolean);
+  if(!name){alert('세트 이름을 입력해주세요!');return;}
+  if(rawWords.length<2){alert('단어를 2개 이상 입력해주세요!');return;}
+  const hints=document.getElementById('fHints').value.split('\n').map(h=>h.trim());
+  const emojis=document.getElementById('fEmojis').value.split('\n').map(e=>e.trim());
+  let wordObjs=rawWords.map((w,i)=>({word:w,hint:hints[i]||'잘 들어보세요!',emoji:emojis[i]||'📝',distractors:autoDistractors(w)}));
+  wordObjs=collectDistractors(wordObjs);
+
+  const sets=loadCustomSets();
+  if(S.editSetId){
+    const idx=sets.findIndex(s=>s.id===S.editSetId);
+    if(idx>=0)sets[idx]={id:S.editSetId,name,emoji,words:wordObjs};
+  }else{
+    sets.push({id:'c_'+Date.now(),name,emoji,words:wordObjs});
+  }
+  saveCustomSets(sets);
+  buildHome();
+  resetForm();
+  switchTab('tab-sets');
+  renderSetList();
+  alert('저장됐어요! 🎉 홈에서 바로 사용할 수 있어요.');
+});
+
+function resetForm(){
+  S.editSetId=null;
+  document.getElementById('fSetName').value='';
+  document.getElementById('fEmoji').value='📝';
+  document.getElementById('fWords').value='';
+  document.getElementById('fHints').value='';
+  document.getElementById('fEmojis').value='';
+  document.getElementById('wordTags').innerHTML='';
+  document.getElementById('distractorSection').style.display='none';
+  document.getElementById('formTitle').textContent='➕ 새 문제 세트 만들기';
+}
+
+/* ── 실시간 태그 업데이트 ── */
+document.getElementById('fWords').addEventListener('input',updateWordTags);
+
+/* ════════════════════════════════════════════════
+   유틸
+════════════════════════════════════════════════ */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ════════════════════════════════════════════════
+   이벤트 바인딩
+════════════════════════════════════════════════ */
+document.getElementById('teacher-entry').addEventListener('click',showLock);
+document.getElementById('backBtn').addEventListener('click',()=>{
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  buildHome(); showScreen('screen-home');
+});
+document.getElementById('teacherBackBtn').addEventListener('click',()=>showScreen('screen-home'));
+document.getElementById('listenBtn').addEventListener('click',()=>{
+  const item=S.queue[S.cur]; if(item)speak(item.word);
+});
+document.getElementById('fbNext').addEventListener('click',hideFeedback);
+document.getElementById('retryWrongBtn').addEventListener('click',()=>startRetry(S.wrong));
+document.getElementById('retryAllBtn').addEventListener('click',()=>{
+  // 같은 토픽 다시
+  const all=[...BUILTIN,...loadCustomSets()];
+  const topic=all.find(t=>t.id===S.topicId);
+  if(topic)startTopic(topic);
+});
+document.getElementById('homeBtn').addEventListener('click',()=>{
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  buildHome(); showScreen('screen-home');
+});
+
+// 탭 버튼
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+});
+
+/* ════════════════════════════════════════════════
+   초기화
+════════════════════════════════════════════════ */
+buildHome();
+setTimeout(()=>speak('안녕하세요! 받아쓰기 만점왕이에요! 주제를 골라봐요!'),700);
+</script>
+</body>
+</html>
